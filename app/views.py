@@ -5,6 +5,11 @@ from django.core.mail import send_mail
 
 from app.forms import *
 
+
+def home_page(request):
+        
+    return render(request,'home_page.html')
+
 def Registration(request):
     UO=UserForm()
     PO=ProfileForm()
@@ -21,6 +26,7 @@ def Registration(request):
            NSPO=pfd.save(commit=False)
            NSPO.username=NSUO
            NSPO.save()
+           
            send_mail('Registration',
                      'Registration is successfully done',
                      'chandanakamalapuram@gmail.com',
