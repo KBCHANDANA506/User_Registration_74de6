@@ -4,9 +4,19 @@ from django.core.mail import send_mail
 # Create your views here
 
 from app.forms import *
+from app.models import *
+from django.http import HttpResponseRedirect
+from django.contrib.auth import authenticate,login,logout
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+
 
 
 def home_page(request):
+    if request.session.get('username'):
+        username=request.session.get('username')
+        d={'username':username}
+        return render(request,'home_page.html',d)
         
     return render(request,'home_page.html')
 
@@ -28,10 +38,10 @@ def Registration(request):
            NSPO.save()
            
            send_mail('Registration',
-                     'Registration is successfully done',
-                     'chandanakamalapuram@gmail.com',
-                     [NSUO.email],
-                     fail_silently=False,
+           'Registration is successfully done',
+           'chandanakamalapuram@gmail.com',
+           [NSUO.email],
+           fail_silently=True,
 
 
            )
@@ -49,3 +59,42 @@ def Registration(request):
 
 
     return render(request,'Registration.html',d)
+
+def user_login(request):
+    if request.method=='POST':
+        username=request.POST['username']
+        password=request.POST['password']
+
+        AUO=authenticate(username=username,password=password)
+        if AUO and AUO.is_active:
+            login(request,AUO)
+            request.session['username']=username
+            return HttpResponseRedirect(reverse('home_page'))
+        else:
+            return HttpResponse('invalid username or password')
+        
+    return render(request,'user_login.html')
+
+    
+@login_required   
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('home_page'))
+
+@login_required
+def display_profile(request):
+    username=request.session.get('username')
+    UO=User.objects.get(username=username)
+    PO=Profile.objects.get(username=UO)
+    d={'UO':UO,'PO':PO}
+    return render(request,'display_profile.html',d)
+
+
+
+        
+
+
+
+
+    
+
